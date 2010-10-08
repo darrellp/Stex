@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegexString Library", "RegexString Library.csproj", "{6327C003-CAF0-4613-99EF-E88EE8513F2E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegexStringTestProject", "RegexStringTestProject\RegexStringTestProject.csproj", "{65DC8EA0-7E16-4570-A6A3-9F88FC9F9B15}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6327C003-CAF0-4613-99EF-E88EE8513F2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6327C003-CAF0-4613-99EF-E88EE8513F2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6327C003-CAF0-4613-99EF-E88EE8513F2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6327C003-CAF0-4613-99EF-E88EE8513F2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65DC8EA0-7E16-4570-A6A3-9F88FC9F9B15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65DC8EA0-7E16-4570-A6A3-9F88FC9F9B15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65DC8EA0-7E16-4570-A6A3-9F88FC9F9B15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65DC8EA0-7E16-4570-A6A3-9F88FC9F9B15}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		VisualSVNWorkingCopyRoot = .
+	EndGlobalSection
+EndGlobal
