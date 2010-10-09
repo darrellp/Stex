@@ -355,7 +355,7 @@ namespace RegexStringLibrary
 		/// <returns>pattern</returns>
 		public static string Or(this string str, params string[] s)
 		{
-			return "(" + s.Aggregate(str, (sAg, sNext) => sAg + "|" + sNext) + ")";
+			return "(?:" + s.Aggregate(str, (sAg, sNext) => sAg + "|" + sNext) + ")";
 		}
 
 		/// <summary>
@@ -485,6 +485,16 @@ namespace RegexStringLibrary
 				strRep = string.Format("{{{0},}}", count);
 			}
 			return str.AddParens() + strRep;
+		}
+
+		/// <summary>
+		/// Puts the text in an unnamed group
+		/// </summary>
+		/// <param name="str">String to be matched</param>
+		/// <returns>Pattern which names the match</returns>
+		public static string Group(this string str)
+		{
+			return string.Format("({0})", str);
 		}
 
 		/// <summary>
