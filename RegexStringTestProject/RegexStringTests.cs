@@ -172,9 +172,13 @@ namespace RegexStringTestProject
 		public void OrTest()
 		{
 			string output = "Darrell".Or("Jim","Bob","Fred");
-			Assert.AreEqual("(Darrell|Jim|Bob|Fred)", output);
+			Regex rgxOr = new Regex(output);
+			Match match = rgxOr.Match("Jim", 0);
+			Assert.IsTrue(match.Success);
+			Assert.AreEqual("Jim", match.Value);
+			Assert.AreEqual("(?:Darrell|Jim|Bob|Fred)", output);
 			output = Stex.Or("Darrell","Jim","Bob","Fred");
-			Assert.AreEqual("(Darrell|Jim|Bob|Fred)", output);
+			Assert.AreEqual("(?:Darrell|Jim|Bob|Fred)", output);
 		}
 
 		void CheckAddParens(string str, bool fAdd)
