@@ -24,6 +24,7 @@ namespace RegexStringLibrary
 		public static string Any { get { return "."; } }
 		public static string Begin { get { return "^"; } }
 		public static string End { get { return "$"; } }
+		public static string StartAt { get { return @"\G"; }}
 		public static string Unsigned { get { return Digit.RepAtLeast(1); } }
 		public static string DateAmerican { get; private set; }
 		public static string DateEuropean { get; private set; }
@@ -184,10 +185,10 @@ namespace RegexStringLibrary
 // ReSharper restore PossibleNullReferenceException
 			bool success = mtch.Success;
 			bool between = false;
-			string prefix1 = null;
-			string prefix2 = null;
-			string suffix1 = null;
-			string suffix2 = null;
+			string prefix1 = string.Empty;
+			string prefix2 = string.Empty;
+			string suffix1 = string.Empty;
+			string suffix2 = string.Empty;
 			DateTime dt1 = new DateTime();
 			DateTime dt2 = new DateTime();
 
