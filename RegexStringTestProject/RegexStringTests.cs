@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using RegexStringLibrary;
@@ -15,32 +12,13 @@ namespace RegexStringTestProject
 	[TestClass]
 	public class RegexStringTest
 	{
-		public RegexStringTest()
-		{
-			//
-			// TODO: Add constructor logic here
-			//
-		}
+	    /// <summary>
+	    ///Gets or sets the test context which provides
+	    ///information about and functionality for the current test run.
+	    ///</summary>
+	    public TestContext TestContext { get; set; }
 
-		private TestContext testContextInstance;
-
-		/// <summary>
-		///Gets or sets the test context which provides
-		///information about and functionality for the current test run.
-		///</summary>
-		public TestContext TestContext
-		{
-			get
-			{
-				return testContextInstance;
-			}
-			set
-			{
-				testContextInstance = value;
-			}
-		}
-
-		#region Additional test attributes
+	    #region Additional test attributes
 		//
 		// You can use the following additional attributes as you write your tests:
 		//
@@ -148,7 +126,7 @@ namespace RegexStringTestProject
 				"c".Rep(10,-1));
 			Assert.AreEqual("a*(?:multi-char)+c{10,}", output);
 			
-			output = "a".Rep(2, 1);
+			"a".Rep(2, 1);
 		}
 		[TestMethod]
 		[ExpectedException(typeof(ArgumentException))]
@@ -160,7 +138,7 @@ namespace RegexStringTestProject
 				"c".RepAtLeast(10));
 			Assert.AreEqual("a*(?:multi-char)+c{10,}", output);
 
-			output = "a".RepAtLeast(-1);
+			"a".RepAtLeast(-1);
 		}
 		[TestMethod]
 		public void NameTest()
@@ -171,7 +149,7 @@ namespace RegexStringTestProject
 		[TestMethod]
 		public void OrTest()
 		{
-			string output = "Darrell".Or("Jim","Bob","Fred");
+			string output = Stex.Or("Darrell", "Jim", "Bob", "Fred");
 			Regex rgxOr = new Regex(output);
 			Match match = rgxOr.Match("Jim", 0);
 			Assert.IsTrue(match.Success);
@@ -181,28 +159,28 @@ namespace RegexStringTestProject
 			Assert.AreEqual("(?:Darrell|Jim|Bob|Fred)", output);
 		}
 
-		void CheckAddParens(string str, bool fAdd)
+	    static void CheckAddParens(string str, bool fAdd)
 		{
 			if (!fAdd)
 			{
-				Assert.AreEqual(str, Stex.AddParens(str));
+				Assert.AreEqual(str, str.AddParens());
 			}
 			else
 			{
-				Assert.AreEqual("(?:" + str + ")", Stex.AddParens(str));
+				Assert.AreEqual("(?:" + str + ")", str.AddParens());
 			}
 		}
 
 		[TestMethod]
 		public void AddParensTest()
 		{
-			string str0 = "a";
-			string str1 = @"\a";
-			string str2 = "[abc]";
-			string str3 = "(abc)";
-			string str4 = @"[a\]b]";
-			string str5 = "(ab[cd])";
-			string str6 = @"(a\)bc)";
+			const string str0 = "a";
+			const string str1 = @"\a";
+			const string str2 = "[abc]";
+			const string str3 = "(abc)";
+			const string str4 = @"[a\]b]";
+			const string str5 = "(ab[cd])";
+			const string str6 = @"(a\)bc)";
 			CheckAddParens(str0, false);
 			CheckAddParens(str1, false);
 			CheckAddParens(str2, false);
@@ -211,11 +189,11 @@ namespace RegexStringTestProject
 			CheckAddParens(str5, false);
 			CheckAddParens(str6, false);
 
-			string str7 = "multi-char";
-			string str8 = "(abc)(def)";
-			string str9 = "[abc][def]";
-			string str10 = @"(abc\)";
-			string str11 = @"[abc\]";
+			const string str7 = "multi-char";
+			const string str8 = "(abc)(def)";
+			const string str9 = "[abc][def]";
+			const string str10 = @"(abc\)";
+			const string str11 = @"[abc\]";
 			CheckAddParens(str7, true);
 			CheckAddParens(str8, true);
 			CheckAddParens(str9, true);
