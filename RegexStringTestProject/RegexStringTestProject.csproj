@@ -48,9 +48,6 @@
     <Compile Include="RegexStringTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AuthoringTests.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\RegexString Library.csproj">
       <Project>{6327C003-CAF0-4613-99EF-E88EE8513F2E}</Project>
       <Name>RegexString Library</Name>
