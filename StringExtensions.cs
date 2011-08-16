@@ -432,7 +432,7 @@ namespace RegexStringLibrary
 		/// </summary>
 		/// <param name="str">String to be parenthesized</param>
 		/// <returns>Properly parenthesized string</returns>
-		public static string AddParens(this string str)
+		public static string AsGroup(this string str)
 		{
 			string strRet;
 
@@ -445,6 +445,12 @@ namespace RegexStringLibrary
 				strRet = "(?:" + str + ")";
 			}
 			return strRet;
+		}
+
+		[Obsolete("Use AsGroup")]
+		public static string AddParens(this string str)
+		{
+			return AsGroup(str);
 		}
 
 		/// <summary>
@@ -494,7 +500,7 @@ namespace RegexStringLibrary
 			{
 				throw new ArgumentException("least must be less than most in Rep");
 			}
-			return str.AddParens() + strRep;
+			return str.AsGroup() + strRep;
 		}
 
 		/// <summary>
@@ -522,7 +528,7 @@ namespace RegexStringLibrary
 			{
 				strRep = string.Format("{{{0},}}", count);
 			}
-			return str.AddParens() + strRep;
+			return str.AsGroup() + strRep;
 		}
 
 		/// <summary>
@@ -530,9 +536,15 @@ namespace RegexStringLibrary
 		/// </summary>
 		/// <param name="str">String to be matched</param>
 		/// <returns>Pattern which names the match</returns>
-		public static string Group(this string str)
+		public static string Capture(this string str)
 		{
 			return string.Format("({0})", str);
+		}
+
+		[Obsolete("Use Capture")]
+		public static string Group(this string str)
+		{
+			return Capture(str);
 		}
 
 		/// <summary>
