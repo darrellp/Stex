@@ -17,10 +17,10 @@ namespace RegexStringLibrary
 		public static string LowerLetterRange { get { return Range("a","z"); } }
 		public static string LetterRange { get { return CapLetterRange + LowerLetterRange; } }
 		public static string AlphanumRange { get { return LetterRange + Digit; } }
-		public static string Letter { get { return AnyChar(LetterRange); } }
-		public static string CapLetter { get { return AnyChar(CapLetterRange); } }
-		public static string LowerLetter { get { return AnyChar(LowerLetterRange); } }
-		public static string Alphanum { get { return AnyChar(AlphanumRange); } }
+		public static string Letter { get { return AnyCharFrom(LetterRange); } }
+		public static string CapLetter { get { return AnyCharFrom(CapLetterRange); } }
+		public static string LowerLetter { get { return AnyCharFrom(LowerLetterRange); } }
+		public static string Alphanum { get { return AnyCharFrom(AlphanumRange); } }
 		public static string Any { get { return "."; } }
 		public static string Begin { get { return "^"; } }
 		public static string End { get { return "$"; } }
@@ -44,15 +44,17 @@ namespace RegexStringLibrary
 			string strEscapedBracket = Esc('\\') + Esc(']');
 			string strInBrackets = Cat(
 				Esc('['),
-				strEscapedBracket.Or(NoChar(Esc(']'))).RepAtLeast(0),
-				NoChar(Esc('\\')),
+				strEscapedBracket.OrAnyOf(
+					NotCharIn(Esc(']'))).RepAtLeast(0),
+				NotCharIn(Esc('\\')),
 				Esc(']'));
 			string strInParens = Cat(
 				Esc('('),
-				strEscapedParen.Or(NoChar(Esc(')'))).RepAtLeast(0),
-				NoChar(Esc('\\')),
+				strEscapedParen.OrAnyOf(
+					Not(Esc(')'))).RepAtLeast(0),
+					Not(Esc('\\')),
 				Esc(')'));
-			string strIgnore = Begin + Any.Or(strEscape, strInBrackets, strInParens) + End;
+			string strIgnore = Begin + Any.OrAnyOf(strEscape, strInBrackets, strInParens) + End;
 			RgxIgnore = new Regex(strIgnore);
 			DateAmerican = Date(true, false);
 			DateEuropean = Date(false, false);
@@ -231,19 +233,19 @@ namespace RegexStringLibrary
 
 		static string Date(bool fAmerican, bool fAllowBetween)
 		{
-			string strMonthAbbr = Or("JAN", "FEB", "MAR", "APR", "JUN", "JUL",
+			string strMonthAbbr = AnyOf("JAN", "FEB", "MAR", "APR", "JUN", "JUL",
 				"AUG", "SEP", "OCT", "NOV", "DEC").Named("mnthName") + ".".Optional();
-			string strMonthSpelled = Or("JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+			string strMonthSpelled = AnyOf("JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
 				"JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER").Named("mnthName");
-			string strMonthName = strMonthAbbr.Or(strMonthSpelled);
-			string strSeparator = Or("-", "/", ".", " ");
-			string strBetween = Or("Between", "Bet").Named("betweenPrefix");
-			string strPrefix = Or("About", "Abt", "A",
+			string strMonthName = strMonthAbbr.OrAnyOf(strMonthSpelled);
+			string strSeparator = AnyOf("-", "/", ".", " ");
+			string strBetween = AnyOf("Between", "Bet").Named("betweenPrefix");
+			string strPrefix = AnyOf("About", "Abt", "A",
 								  "After", "Aft",
 								  "Before", "Bef", "B",
 								  "Calculated", "Cal",
 								  "Circa", "Cir", "Ca", "C").Named("prefix");
-			string strSuffix = Or("BC", "B.C.").Named("suffix");
+			string strSuffix = AnyOf("BC", "B.C.").Named("suffix");
 
 			string strTwoDigits = Cat(Digit, Digit.Optional());
 			string strDay = strTwoDigits.Named("day");
@@ -256,14 +258,14 @@ namespace RegexStringLibrary
 			string strDate3 = strYear + " " + strMonthName + " " + strDay;
 			string strDate4 = strYear + strSeparator + strMonth + strSeparator + strDay;
 			string strDate5 = strYear;
-			string strSingleDate = (strPrefix + " ").Optional() + Or(
+			string strSingleDate = (strPrefix + " ").Optional() + AnyOf(
 				strDate1,
 				strDate2,
 				fAmerican ? strDateAmerican : strDateEuropean,
 				strDate3,
 				strDate4,
 				strDate5) + (" " + strSuffix).Optional();
-			string strTags = Or("mnthName", "prefix", "suffix", "day", "month", "year");
+			string strTags = AnyOf("mnthName", "prefix", "suffix", "day", "month", "year");
 			// Performing regex replacements on our regex string!  Kinky!
 			string strSingleDate2 = Regex.Replace(strSingleDate, strTags, "$&2");
 			return Cat(
@@ -354,9 +356,15 @@ namespace RegexStringLibrary
 		/// <param name="str">this</param>
 		/// <param name="s">the other strings</param>
 		/// <returns>pattern</returns>
-		public static string Or(this string str, params string[] s)
+		public static string OrAnyOf(this string str, params string[] s)
 		{
 			return "(?:" + s.Aggregate(str, (sAg, sNext) => sAg + "|" + sNext) + ")";
+		}
+
+		[Obsolete("Use OrAnyOf()")]
+		public static string Or(this string str, params string[] s)
+		{
+			return str.OrAnyOf(s);
 		}
 
 		/// <summary>
@@ -364,9 +372,15 @@ namespace RegexStringLibrary
 		/// </summary>
 		/// <param name="s">the other strings</param>
 		/// <returns>pattern</returns>
+		public static string AnyOf(params string[] s)
+		{
+			return s[0].OrAnyOf(s.Skip(1).ToArray());
+		}
+
+		[Obsolete("Use AnyOf")]
 		public static string Or(params string[] s)
 		{
-			return s[0].Or(s.Skip(1).ToArray());
+			return AnyOf(s);
 		}
 
 		/// <summary>
@@ -374,9 +388,15 @@ namespace RegexStringLibrary
 		/// </summary>
 		/// <param name="s">Characters or ranges</param>
 		/// <returns>Pattern</returns>
-		public static string AnyChar(params string[] s)
+		public static string AnyCharFrom(params string[] s)
 		{
 			return "[" + Cat(s) + "]";
+		}
+
+		[Obsolete("Use AnyCharFrom()")]
+		public static string AnyChar(params string[] s)
+		{
+			return AnyCharFrom(s);
 		}
 
 		/// <summary>
@@ -384,9 +404,26 @@ namespace RegexStringLibrary
 		/// </summary>
 		/// <param name="s">Characters or ranges</param>
 		/// <returns>Pattern</returns>
-		public static string NoChar(params string[] s)
+		public static string NotCharIn(params string[] s)
 		{
 			return "[^" + Cat(s) + "]";
+		}
+
+
+		/// <summary>
+		/// Cosmetic version of NotCharIn which works better for single characters
+		/// </summary>
+		/// <param name="s">Characters or ranges</param>
+		/// <returns>Pattern</returns>
+		public static string Not(params string[] s)
+		{
+			return NotCharIn(s);
+		}
+
+		[Obsolete("Use Not() or NotCharIn()")]
+		public static string NoChar(params string[] s)
+		{
+			return NotCharIn(s);
 		}
 
 		/// <summary>
