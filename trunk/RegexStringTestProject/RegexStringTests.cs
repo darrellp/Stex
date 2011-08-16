@@ -163,11 +163,11 @@ namespace RegexStringTestProject
 		{
 			if (!fAdd)
 			{
-				Assert.AreEqual(str, str.AddParens());
+				Assert.AreEqual(str, str.AsGroup());
 			}
 			else
 			{
-				Assert.AreEqual("(?:" + str + ")", str.AddParens());
+				Assert.AreEqual("(?:" + str + ")", str.AsGroup());
 			}
 		}
 
