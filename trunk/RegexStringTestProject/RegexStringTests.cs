@@ -149,13 +149,13 @@ namespace RegexStringTestProject
 		[TestMethod]
 		public void OrTest()
 		{
-			string output = Stex.Or("Darrell", "Jim", "Bob", "Fred");
+			string output = Stex.AnyOf("Darrell", "Jim", "Bob", "Fred");
 			Regex rgxOr = new Regex(output);
 			Match match = rgxOr.Match("Jim", 0);
 			Assert.IsTrue(match.Success);
 			Assert.AreEqual("Jim", match.Value);
 			Assert.AreEqual("(?:Darrell|Jim|Bob|Fred)", output);
-			output = Stex.Or("Darrell","Jim","Bob","Fred");
+			output = Stex.AnyOf("Darrell","Jim","Bob","Fred");
 			Assert.AreEqual("(?:Darrell|Jim|Bob|Fred)", output);
 		}
 
