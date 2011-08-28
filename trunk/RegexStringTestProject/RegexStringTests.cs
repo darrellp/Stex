@@ -200,5 +200,46 @@ namespace RegexStringTestProject
 			CheckAddParens(str10, true);
 			CheckAddParens(str11, true);
 		}
+
+		private static void TestNumericString(Regex rgx, string strTest, bool fMatch)
+		{
+			Match mtch = rgx.Match(strTest);
+			Assert.AreEqual(mtch.Success, fMatch);
+			if (fMatch)
+			{
+				Assert.AreEqual(mtch.Groups["value"].Value, strTest);
+			}
+		}
+
+		[TestMethod]
+		public void NumberTest()
+		{
+			Regex rgx = new Regex(Stex.StartAt + Stex.Integer("value") + Stex.End);
+
+			TestNumericString(rgx, "143", true);
+			TestNumericString(rgx, "-143", true);
+			TestNumericString(rgx, "143A", false);
+			TestNumericString(rgx, "a14", false);
+			TestNumericString(rgx, "--143", false);
+			TestNumericString(rgx, "-", false);
+
+			rgx = new Regex(Stex.StartAt + Stex.UnsignedInteger("value") + Stex.End);
+			TestNumericString(rgx, "143", true);
+			TestNumericString(rgx, "-143", false);
+
+			rgx = new Regex(Stex.StartAt + Stex.Float("value") + Stex.End);
+			TestNumericString(rgx, "143", true);
+			TestNumericString(rgx, "143.", true);
+			TestNumericString(rgx, "-143.", true);
+			TestNumericString(rgx, "-143", true);
+			TestNumericString(rgx, "143.2", true);
+			TestNumericString(rgx, ".3", true);
+			TestNumericString(rgx, "-.3", true);
+			TestNumericString(rgx, ".", false);
+			TestNumericString(rgx, "-", false);
+			TestNumericString(rgx, "143.a", false);
+			TestNumericString(rgx, "a.2", false);
+			TestNumericString(rgx, "-a", false);
+		}
 	}
 }
