@@ -307,6 +307,36 @@ namespace RegexStringLibrary
 			return @"\" + strch;
 		}
 
+		public static string Integer(string strName = "")
+		{
+			string strSearch = "-".Optional() + UnsignedInteger();
+			if (strName != String.Empty)
+			{
+				strSearch = strSearch.Named(strName);
+			}
+			return strSearch;
+		}
+
+		public static string UnsignedInteger(string strName = "")
+		{
+			string strSearch = Digit.RepAtLeast(1);
+			if (strName != String.Empty)
+			{
+				strSearch = strSearch.Named(strName);
+			}
+			return strSearch;
+		}
+
+		public static string Float(string strName = "")
+		{
+			string strSearch = "-".Optional() + UnsignedInteger().If(UnsignedInteger() + ".".Optional() + Digit.Rep(0, -1), "." + Digit.Rep(1, -1));
+			if (strName != String.Empty)
+			{
+				strSearch = strSearch.Named(strName);
+			}
+			return strSearch;
+		}
+
 		/// <summary>
 		/// Pattern which depends on whether a group has been matched
 		/// </summary>
