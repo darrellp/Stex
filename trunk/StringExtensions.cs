@@ -24,6 +24,7 @@ namespace RegexStringLibrary
 		public static string Any { get { return "."; } }
 		public static string Begin { get { return "^"; } }
 		public static string End { get { return "$"; } }
+		public static string Failure { get { return "(?!)";  } }
 		public static string StartAt { get { return @"\G"; }}
 		public static string Unsigned { get { return Digit.RepAtLeast(1); } }
 		public static string DateAmerican { get; private set; }
@@ -272,7 +273,7 @@ namespace RegexStringLibrary
 					Begin,
 					fAllowBetween ? (strBetween + " ").Optional() : string.Empty,
 					strSingleDate,
-					fAllowBetween ? "betweenPrefix".If(" AND " + strSingleDate2, "") : string.Empty,
+					fAllowBetween ? "betweenPrefix".If(" AND " + strSingleDate2) : string.Empty,
 					End)
 				.CaseSensitive(false);
 		}
@@ -307,6 +308,15 @@ namespace RegexStringLibrary
 			return @"\" + strch;
 		}
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Pattern for integers. </summary>
+		///
+		/// <remarks>	Darrellp, 8/29/2011. </remarks>
+		///
+		/// <param name="strName">	Name for the match. </param>
+		///
+		/// <returns>	Pattern to recognize integers. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Integer(string strName = "")
 		{
 			string strSearch = "-".Optional() + UnsignedInteger();
@@ -317,6 +327,15 @@ namespace RegexStringLibrary
 			return strSearch;
 		}
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Pattern for unsigned integers. </summary>
+		///
+		/// <remarks>	Darrellp, 8/29/2011. </remarks>
+		///
+		/// <param name="strName">	Name for the match. </param>
+		///
+		/// <returns>	Pattern to recognize unsigned integers. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string UnsignedInteger(string strName = "")
 		{
 			string strSearch = Digit.RepAtLeast(1);
@@ -327,6 +346,15 @@ namespace RegexStringLibrary
 			return strSearch;
 		}
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Pattern for floats. </summary>
+		///
+		/// <remarks>	Darrellp, 8/29/2011. </remarks>
+		///
+		/// <param name="strName">	Name for the match. </param>
+		///
+		/// <returns>	Pattern to recognize floats. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Float(string strName = "")
 		{
 			string strSearch = "-".Optional() + UnsignedInteger().If(UnsignedInteger() + ".".Optional() + Digit.Rep(0, -1), "." + Digit.Rep(1, -1));
@@ -335,18 +363,6 @@ namespace RegexStringLibrary
 				strSearch = strSearch.Named(strName);
 			}
 			return strSearch;
-		}
-
-		/// <summary>
-		/// Pattern which depends on whether a group has been matched
-		/// </summary>
-		/// <param name="strLabel">Group to check whether it's matched</param>
-		/// <param name="strHasMatched">Pattern to use if there was a match</param>
-		/// <param name="strDidntMatch">Pattern to use if there wasn't a match</param>
-		/// <returns>Conditional pattern</returns>
-		public static string If(this string strLabel, string strHasMatched, string strDidntMatch)
-		{
-			return string.Format("(?({0}){1}|{2})", strLabel, strHasMatched, strDidntMatch);
 		}
 
 		/// <summary>
@@ -561,11 +577,71 @@ namespace RegexStringLibrary
 			return str.AsGroup() + strRep;
 		}
 
-		/// <summary>
-		/// Puts the text in an unnamed group
-		/// </summary>
-		/// <param name="str">String to be matched</param>
-		/// <returns>Pattern which names the match</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Positive look ahead. </summary>
+		///
+		/// <remarks>	Darrellp, 8/29/2011. </remarks>
+		///
+		/// <param name="str">	pattern to look ahead for. </param>
+		///
+		/// <returns>	Positive lookahead pattern. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static string PosLookAhead(this string str)
+		{
+			return string.Format("(?={0})", str);
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Negative look ahead. </summary>
+		///
+		/// <remarks>	Darrellp, 8/29/2011. </remarks>
+		///
+		/// <param name="str">	pattern to look ahead for. </param>
+		///
+		/// <returns>	Negative lookahead pattern. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static string NegLookAhead(this string str)
+		{
+			return string.Format("(?!{0})", str);
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Positive look behind. </summary>
+		///
+		/// <remarks>	Darrellp, 8/29/2011. </remarks>
+		///
+		/// <param name="str">	pattern to look behind for. </param>
+		///
+		/// <returns>	Positive look behind pattern. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static string PosLookBehind(this string str)
+		{
+			return string.Format("(?<={0})", str);
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Negative look behind. </summary>
+		///
+		/// <remarks>	Darrellp, 8/29/2011. </remarks>
+		///
+		/// <param name="str">	pattern to look behind for. </param>
+		///
+		/// <returns>	Negative look behind pattern. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static string NegLookBehind(this string str)
+		{
+			return string.Format("(?<!{0})", str);
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Puts the text in an unnamed group. </summary>
+		///
+		/// <remarks>	Darrellp, 8/29/2011. </remarks>
+		///
+		/// <param name="str">	String to be matched. </param>
+		///
+		/// <returns>	Pattern which names the match. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Capture(this string str)
 		{
 			return string.Format("({0})", str);
@@ -586,6 +662,91 @@ namespace RegexStringLibrary
 		public static string Named(this string str, string strName)
 		{
 			return string.Format("(?<{0}>{1})", strName, str);
+		}
+
+		/// <summary>
+		/// Pattern which depends on whether a group has been matched
+		/// </summary>
+		/// <param name="strLabel">Group to check whether it's matched</param>
+		/// <param name="strHasMatched">Pattern to use if there was a match</param>
+		/// <param name="strDidntMatch">Pattern to use if there wasn't a match</param>
+		/// <returns>Conditional pattern</returns>
+		public static string If(this string strLabel, string strHasMatched, string strDidntMatch = "")
+		{
+			return string.Format("(?({0}){1}|{2})", strLabel, strHasMatched, strDidntMatch);
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	
+		/// Pushes the match onto the stack named strStack.  This is actually identical to the Named routine. 
+		/// </summary>
+		///
+		/// <remarks>	Darrellp, 8/29/2011. </remarks>
+		///
+		/// <param name="str">		String to be matched. </param>
+		/// <param name="strStack">	Stack to push the match onto. </param>
+		///
+		/// <returns>	Pattern which pushes the stack. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static string Push(this string str, string strStack)
+		{
+			return string.Format("(?<{0}>{1})", strStack, str);
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Pops the named stack. </summary>
+		///
+		/// <remarks>	Darrellp, 8/29/2011. </remarks>
+		///
+		/// <param name="str">		String to be matched. </param>
+		/// <param name="strStack">	Name for the match. </param>
+		///
+		/// <returns>	Pattern which names the match. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static string Pop(this string str, string strStack)
+		{
+			return string.Format("(?<-{0}>{1})", strStack, str);
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Pushes a stack while popping another. </summary>
+		///
+		/// <remarks>	Darrellp, 8/28/2011. </remarks>
+		///
+		/// <param name="str">			string to be matched. </param>
+		/// <param name="strPushStack">	Stack to push match onto. </param>
+		/// <param name="strPopStack">	Stack to pop. </param>
+		///
+		/// <returns>	Regex string to push and pop. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static string PushPop(this string str, string strPushStack, string strPopStack)
+		{
+			return str.Push(strPushStack + "-" + strPopStack);
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Matches only if the passed in stack is empty. </summary>
+		///
+		/// <remarks>	Darrellp, 8/28/2011. </remarks>
+		///
+		/// <param name="strStack">	Stack to test. </param>
+		///
+		/// <returns>	Regex pattern which matches if the stack is empty, fails otherwise. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static string MatchEmptyStack(string strStack)
+		{
+			return If(strStack, Failure);
+		}
+
+		public static string BalancingGroup(string strOpen, string strClose, string strBetween)
+		{
+			string strOpenGroup = strOpen.Named("Open");
+			string strOpenBody = (strOpenGroup + strBetween.Rep(0, -1)).RepAtLeast(1);
+			string strCloseGroup = strClose.Named("Close-Open");
+			string strCloseBody = (strCloseGroup + strBetween.Rep(0, -1)).RepAtLeast(1);
+			string strBalanced = (strOpenBody + strCloseBody).Rep(0, -1) + MatchEmptyStack("Open");
+
+			return strBalanced;
 		}
 	}
 }
