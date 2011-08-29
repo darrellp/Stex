@@ -241,5 +241,11 @@ namespace RegexStringTestProject
 			TestNumericString(rgx, "a.2", false);
 			TestNumericString(rgx, "-a", false);
 		}
+
+		[TestMethod]
+		public void BalancingGroupTest()
+		{
+			string strBG = Stex.BalancingGroup("{", "}", Stex.NotCharIn("{}"));
+		}
 	}
 }
