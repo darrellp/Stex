@@ -21,6 +21,8 @@ namespace RegexStringLibrary
 		public static string CapLetter { get { return AnyCharFrom(CapLetterRange); } }
 		public static string LowerLetter { get { return AnyCharFrom(LowerLetterRange); } }
 		public static string Alphanum { get { return AnyCharFrom(AlphanumRange); } }
+		public static string StringStart { get { return "\\A"; } }
+		public static string StringEnd { get { return "\\Z"; } }
 		public static string Any { get { return "."; } }
 		public static string Begin { get { return "^"; } }
 		public static string End { get { return "$"; } }
@@ -357,7 +359,9 @@ namespace RegexStringLibrary
 		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Float(string strName = "")
 		{
-			string strSearch = "-".Optional() + UnsignedInteger().If(UnsignedInteger() + ".".Optional() + Digit.Rep(0, -1), "." + Digit.Rep(1, -1));
+			string dot = '.'.Esc().Optional();
+			string digits = Digit.Rep(0, -1);
+			string strSearch = "-".Optional() + AnyOf(UnsignedInteger() + dot + digits, digits + dot + UnsignedInteger());
 			if (strName != String.Empty)
 			{
 				strSearch = strSearch.Named(strName);
@@ -744,7 +748,7 @@ namespace RegexStringLibrary
 			string strOpenBody = (strOpenGroup + strBetween.Rep(0, -1)).RepAtLeast(1);
 			string strCloseGroup = strClose.Named("Close-Open");
 			string strCloseBody = (strCloseGroup + strBetween.Rep(0, -1)).RepAtLeast(1);
-			string strBalanced = (strOpenBody + strCloseBody).Rep(0, -1) + MatchEmptyStack("Open");
+			string strBalanced = (strOpenBody + strCloseBody).RepAtLeast(1) + MatchEmptyStack("Open");
 
 			return strBalanced;
 		}
