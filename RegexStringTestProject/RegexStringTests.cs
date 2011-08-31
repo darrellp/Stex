@@ -240,6 +240,8 @@ namespace RegexStringTestProject
 			TestNumericString(rgx, "143.a", false);
 			TestNumericString(rgx, "a.2", false);
 			TestNumericString(rgx, "-a", false);
+			TestNumericString(rgx, "4 7", false);
+			TestNumericString(rgx, "4 7 1", false);
 		}
 
 		[TestMethod]
