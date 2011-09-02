@@ -13,6 +13,7 @@ namespace RegexStringLibrary
 		public static string Word { get { return @"\w"; } }
 		public static string Tab { get { return @"\t"; } }
 		public static string White { get { return @"\s"; } }
+		public static string WhitePadding { get { return White.Rep(0, -1); } }
 		public static string CapLetterRange { get { return Range("A", "Z"); } }
 		public static string LowerLetterRange { get { return Range("a","z"); } }
 		public static string LetterRange { get { return CapLetterRange + LowerLetterRange; } }
@@ -522,7 +523,7 @@ namespace RegexStringLibrary
 		/// <param name="least">Least number of times to repeat</param>
 		/// <param name="most">Most number of times to repeat</param>
 		/// <returns>pattern which matches the original number of string repeated properly</returns>
-		public static string Rep(this string str, int least, int most)
+		public static string Rep(this string str, int least, int most = -1)
 		{
 			string strRep;
 
@@ -668,6 +669,10 @@ namespace RegexStringLibrary
 			return string.Format("(?<{0}>{1})", strName, str);
 		}
 
+		public static string Atomic(this string str)
+		{
+			return string.Format("(?>{0})", str);
+		}
 		/// <summary>
 		/// Pattern which depends on whether a group has been matched
 		/// </summary>
@@ -742,13 +747,14 @@ namespace RegexStringLibrary
 			return If(strStack, Failure);
 		}
 
-		public static string BalancingGroup(string strOpen, string strClose, string strBetween)
+		public static string BalancedGroup(string strOpen, string strClose, string strBetween)
 		{
-			string strOpenGroup = strOpen.Named("Open");
-			string strOpenBody = (strOpenGroup + strBetween.Rep(0, -1)).RepAtLeast(1);
-			string strCloseGroup = strClose.Named("Close-Open");
-			string strCloseBody = (strCloseGroup + strBetween.Rep(0, -1)).RepAtLeast(1);
-			string strBalanced = (strOpenBody + strCloseBody).RepAtLeast(1) + MatchEmptyStack("Open");
+			string strInterior = strBetween.RepAtLeast(1);
+			string strEnter = strOpen + Push(string.Empty, "n");
+			string strExit = strClose + Pop(string.Empty, "n");
+			string strAtomic = AnyOf(strInterior, strEnter, strExit).Atomic().Rep(0);
+			string strCheck = MatchEmptyStack("n");
+			string strBalanced = strOpen + strAtomic + strCheck + strClose;
 
 			return strBalanced;
 		}
