@@ -71,6 +71,10 @@ namespace RegexStringTestProject
 		{
 			Regex rgxBet = Stex.AmericanDateBetRegExp;
 			Regex rgx = Stex.AmericanDateRegExp;
+			VerifyGoodDate(rgxBet, "February 10, 1912", "", "", "February", "10", "1912", "");
+			VerifyGoodDate(rgxBet, "1940", "", "", "", "", "1940", "");
+			VerifyGoodDate(rgxBet, "ca 1932", "ca", "", "", "", "1932", "");
+			VerifyGoodDate(rgxBet, "after 2000", "after", "", "", "", "2000", "");
 			VerifyGoodDate(rgxBet, "11/04/1956", "", "11", "", "04", "1956", "");
 			VerifyGoodDate(rgxBet, "NOV 4, 1956", "", "", "NOV", "4", "1956", "");
 			VerifyGoodDate(rgxBet, "Nov 4, 1956", "", "", "Nov", "4", "1956", "");
