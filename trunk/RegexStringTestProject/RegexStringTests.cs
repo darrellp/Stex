@@ -222,6 +222,7 @@ namespace RegexStringTestProject
 			TestNumericString(rgx, "a14", false);
 			TestNumericString(rgx, "--143", false);
 			TestNumericString(rgx, "-", false);
+			TestNumericString(rgx, "", false);
 
 			rgx = new Regex(Stex.StartAt + Stex.UnsignedInteger("value") + Stex.End);
 			TestNumericString(rgx, "143", true);
@@ -247,7 +248,7 @@ namespace RegexStringTestProject
 		[TestMethod]
 		public void BalancingGroupTest()
 		{
-			string strBG = Stex.BalancingGroup("{", "}", Stex.NotCharIn("{}"));
+			string strBG = Stex.BalancedGroup("{", "}", Stex.NotCharIn("{}"));
 		}
 	}
 }
