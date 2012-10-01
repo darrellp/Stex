@@ -4,6 +4,18 @@ using System.Text.RegularExpressions;
 
 namespace RegexStringLibrary
 {
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// <summary>	Regular expression extensions for strings. </summary>
+	///
+	/// <remarks>	
+	/// This set of extensions only deals with the string versions for regular expressions. That's
+	/// where the complexity lies.  It also allows for cascading and combining of the results since
+	/// they are all strings.  The only exception to this is the date info since this is a really
+	/// complex string with vaious options available so we tailor the result for the situation and do
+	/// the match in our code and interpret the results into a DateInfo object.  See the tests for
+	/// examples of usage.  Darrellp, 10/1/2012. 
+	/// </remarks>
+	////////////////////////////////////////////////////////////////////////////////////////////////////
 	public static class Stex
 	{
 		public static string Bell { get { return @"\a"; } }
@@ -13,7 +25,7 @@ namespace RegexStringLibrary
 		public static string Word { get { return @"\w"; } }
 		public static string Tab { get { return @"\t"; } }
 		public static string White { get { return @"\s"; } }
-		public static string WhitePadding { get { return White.Rep(0, -1); } }
+		public static string WhitePadding { get { return White.Rep(0); } }
 		public static string CapLetterRange { get { return Range("A", "Z"); } }
 		public static string LowerLetterRange { get { return Range("a","z"); } }
 		public static string LetterRange { get { return CapLetterRange + LowerLetterRange; } }
@@ -34,13 +46,22 @@ namespace RegexStringLibrary
 		public static string DateEuropean { get; private set; }
 		public static string DateAmericanBet { get; private set; }
 		public static string DateEuropeanBet { get; private set; }
-		public static Regex AmericanDateRegExp { get; private set; }
-		public static Regex EuropeanDateRegExp { get; private set; }
-		public static Regex AmericanDateBetRegExp { get; private set; }
-		public static Regex EuropeanDateBetRegExp { get; private set; }
 
-		private static readonly Regex RgxIgnore;
+		// These are public mainly for testing purposes
+		public static Regex AmericanDateRegExp { get; set; }
+		public static Regex EuropeanDateRegExp { get; set; }
+		public static Regex AmericanDateBetRegExp { get; set; }
+		public static Regex EuropeanDateBetRegExp { get; set; }
 
+		// Applied to rgx strings to determine whether they require parenthesization or not.
+		// This keeps us from parenthesizing "(...)" and getting "((...))".
+		private static readonly Regex RgxDontParenthesize;
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Static constructor. </summary>
+		///
+		/// <remarks>	Initializes strings and values.  Darrellp, 10/1/2012. </remarks>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		static Stex()
 		{
 			string strEscape = Esc('\\') + Any;
@@ -59,7 +80,7 @@ namespace RegexStringLibrary
 					Not(Esc('\\')),
 				Esc(')'));
 			string strIgnore = Begin + Any.OrAnyOf(strEscape, strInBrackets, strInParens) + End;
-			RgxIgnore = new Regex(strIgnore);
+			RgxDontParenthesize = new Regex(strIgnore);
 			DateAmerican = Date(true, false);
 			DateEuropean = Date(false, false);
 			DateAmericanBet = Date(true, true);
@@ -71,22 +92,60 @@ namespace RegexStringLibrary
 			EuropeanDateBetRegExp = new Regex(DateEuropeanBet, RegexOptions.Compiled);
 		}
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Determine whether the search is case sensitive or not. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="str">				pattern to be affected. </param>
+		/// <param name="fCaseSensitive">	true to be case sensitive, false for case insensitive. </param>
+		///
+		/// <returns>	. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string CaseSensitive(this string str, bool fCaseSensitive)
 		{
 			return "(?" + (fCaseSensitive ? "-" : "") + "i:" + str + ")";
 		}
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Date information. </summary>
+		///
+		/// <remarks>	
+		/// The dates are either an individual date or a period between two dates.  Either date can be
+		/// prefixed with "about", "circa", "before", "after" or "calculated".  These can be abbreviated
+		/// as follows:
+		/// 
+		/// About - "Abt", "A" 
+		/// Before - "Bef", "B" 
+		/// Calculated - "Cal" 
+		/// Circa - "Cir", "Ca", "C"
+		/// 
+		/// Additionally, dates can be suffixed with "BC" or "B.C.".
+		/// 
+		/// Darrellp, 10/1/2012. 
+		/// </remarks>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public class DateInfo
 		{
+			/// <summary> true if the match was a success, false if it failed </summary>
 			public bool Success;
+			/// <summary> true if this is between two dates </summary>
 			public bool Between;
+			/// <summary> The prefix on the first date </summary>
 			public string Prefix1;
+			/// <summary> The prefix on the second date </summary>
 			public string Prefix2;
+			/// <summary> The suffix on the first date </summary>
 			public string Suffix1;
+			/// <summary> The suffix on the second date </summary>
 			public string Suffix2;
+			/// <summary> First date </summary>
 			public DateTime Date1;
+			/// <summary> Second date </summary>
 			public DateTime Date2;
+
 			static readonly DateTime DateUninitialized = new DateTime(1,DateTimeKind.Utc);
+
 			internal DateInfo(bool successParm, bool betweenParm, string prefix1Parm, string prefix2Parm, DateTime date1Parm, DateTime date2Parm, string suffix1Parm, string suffix2Parm)
 			{
 				Success = successParm;
@@ -167,8 +226,47 @@ namespace RegexStringLibrary
 			return iMonth;
 		}
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Gets date information from a string. </summary>
+		///
+		/// <remarks>	
+		/// Dates can be in American or European ordering.  They are either an individual date or a
+		///  period between two dates.  Either date can be prefixed with "about", "circa", "before",
+		/// "after" or "calculated".  These can be abbreviated as follows:
+		/// 
+		/// About - "Abt", "A" 
+		/// Before - "Bef", "B" 
+		/// Calculated - "Cal" 
+		/// Circa - "Cir", "Ca", "C"
+		/// 
+		/// Additionally, dates can be suffixed with "BC" or "B.C.".
+		/// 
+		/// Some sample dates would include:
+		/// 
+		/// 10/12/2012
+		/// February 10, 1912
+		/// 1000 AD
+		/// between 1948 and 1950
+		/// 11-4-1956
+		/// ca 1932
+		/// after 2000
+		/// 
+		/// Darrellp, 10/1/2012. 
+		/// </remarks>
+		///
+		/// <param name="strDate">			String representing the date. </param>
+		/// <param name="fAmerican">		True for American date ordering. </param>
+		/// <param name="fAllowBetween">	True to allow "between" in the date. </param>
+		///
+		/// <returns>	The date information. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static DateInfo GetDateInfo(string strDate, bool fAmerican, bool fAllowBetween)
 		{
+			if (strDate == null)
+			{
+				throw new ArgumentException("Null date in GetDateInfo");
+			}
+
 			int iType = (fAmerican ? 2 : 0) + (fAllowBetween ? 1 : 0);
 			Regex rgx = null;
 			switch (iType)
@@ -235,6 +333,16 @@ namespace RegexStringLibrary
 			return new DateInfo(success, between, prefix1, prefix2, dt1, dt2, suffix1, suffix2);
 		}
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	This is the regex string for the date. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="fAmerican">		True for American date ordering. </param>
+		/// <param name="fAllowBetween">	True to allow "between" in the date. </param>
+		///
+		/// <returns>	String for regex which parses the date. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		static string Date(bool fAmerican, bool fAllowBetween)
 		{
 			string strMonthAbbr = AnyOf("JAN", "FEB", "MAR", "APR", "JUN", "JUL",
@@ -281,31 +389,43 @@ namespace RegexStringLibrary
 				.CaseSensitive(false);
 		}
 
-		/// <summary>
-		/// Returns hex character
-		/// </summary>
-		/// <param name="strHex">Hex value</param>
-		/// <returns>The hex character string</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Returns hex character. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="strHex">	Hex value. </param>
+		///
+		/// <returns>	The hex character string. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Hex(this string strHex)
 		{
 			return @"\x" + strHex;
 		}
 
-		/// <summary>
-		/// Escape a character
-		/// </summary>
-		/// <param name="ch">Character to escape</param>
-		/// <returns>Escaped character</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Escape a character. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="ch">	Character to escape. </param>
+		///
+		/// <returns>	Escaped character. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Esc(this char ch)
 		{
 			return @"\" + ch;
 		}
 
-		/// <summary>
-		/// Escape a character
-		/// </summary>
-		/// <param name="strch">String with the char to escape</param>
-		/// <returns>Escaped character</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Escape a character. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="strch">	String with the char to escape. </param>
+		///
+		/// <returns>	Escaped character. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Esc(this string strch)
 		{
 			return @"\" + strch;
@@ -361,7 +481,7 @@ namespace RegexStringLibrary
 		public static string Float(string strName = "")
 		{
 			string dot = '.'.Esc().Optional();
-			string digits = Digit.Rep(0, -1);
+			string digits = Digit.Rep(0);
 			string strSearch = "-".Optional() + AnyOf(UnsignedInteger() + dot + digits, digits + dot + UnsignedInteger());
 			if (strName != String.Empty)
 			{
@@ -370,43 +490,59 @@ namespace RegexStringLibrary
 			return strSearch;
 		}
 
-		/// <summary>
-		/// Forces a greedy search on a pattern
-		/// </summary>
-		/// <param name="str">pattern to be made greedy</param>
-		/// <returns>greedy pattern</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Forces a greedy search on a pattern. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="str">	pattern to be made greedy. </param>
+		///
+		/// <returns>	greedy pattern. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Greedy(this string str)
 		{
 			return "(?>" + str + ")";
 		}
 
-		/// <summary>
-		/// Returns a range of chars for use in AnyChar
-		/// </summary>
-		/// <param name="strLow">Starting char</param>
-		/// <param name="strHigh">Ending char</param>
-		/// <returns>The Range</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Returns a range of chars for use in AnyChar. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="strLow">	Starting char. </param>
+		/// <param name="strHigh">	Ending char. </param>
+		///
+		/// <returns>	The Range. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Range(string strLow, string strHigh)
 		{
 			return strLow + '-' + strHigh;
 		}
 
-		/// <summary>
-		/// Concatenates strings
-		/// </summary>
-		/// <param name="s">strings to be concatenated</param>
-		/// <returns>concatenation of all the strings in s</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Concatenates strings. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="s">	strings to be concatenated. </param>
+		///
+		/// <returns>	concatenation of all the strings in s. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Cat(params string[] s)
 		{
 			return s.Aggregate((sAg, str) => sAg + str);
 		}
 
-		/// <summary>
-		/// Creates a pattern which matches either this or any of the parameters
-		/// </summary>
-		/// <param name="str">this</param>
-		/// <param name="s">the other strings</param>
-		/// <returns>pattern</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Creates a pattern which matches either this or any of the parameters. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="str">	this. </param>
+		/// <param name="s">	the other strings. </param>
+		///
+		/// <returns>	pattern. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string OrAnyOf(this string str, params string[] s)
 		{
 			return "(?:" + s.Aggregate(str, (sAg, sNext) => sAg + "|" + sNext) + ")";
@@ -418,11 +554,15 @@ namespace RegexStringLibrary
 			return str.OrAnyOf(s);
 		}
 
-		/// <summary>
-		/// Creates a pattern which matches any of the parameters
-		/// </summary>
-		/// <param name="s">the other strings</param>
-		/// <returns>pattern</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Creates a pattern which matches any of the parameters. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="s">	the other strings. </param>
+		///
+		/// <returns>	pattern. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string AnyOf(params string[] s)
 		{
 			return s[0].OrAnyOf(s.Skip(1).ToArray());
@@ -434,11 +574,15 @@ namespace RegexStringLibrary
 			return AnyOf(s);
 		}
 
-		/// <summary>
-		/// Accept any characters from any of the arguments
-		/// </summary>
-		/// <param name="s">Characters or ranges</param>
-		/// <returns>Pattern</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Accept any characters from any of the arguments. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="s">	Characters or ranges. </param>
+		///
+		/// <returns>	Pattern. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string AnyCharFrom(params string[] s)
 		{
 			return "[" + Cat(s) + "]";
@@ -460,12 +604,15 @@ namespace RegexStringLibrary
 			return "[^" + Cat(s) + "]";
 		}
 
-
-		/// <summary>
-		/// Cosmetic version of NotCharIn which works better for single characters
-		/// </summary>
-		/// <param name="s">Characters or ranges</param>
-		/// <returns>Pattern</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Cosmetic version of NotCharIn which works better for single characters. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="s">	Characters or ranges. </param>
+		///
+		/// <returns>	Pattern. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Not(params string[] s)
 		{
 			return NotCharIn(s);
@@ -477,17 +624,23 @@ namespace RegexStringLibrary
 			return NotCharIn(s);
 		}
 
-		/// <summary>
-		/// Parenthesize a pattern properly.  If it's already parenthesized or is one character
-		/// long, then it's merely returned.  Otherwise, it's surrounded by (?: ... ).
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	
+		/// Parenthesize a pattern properly.  If it's already parenthesized or is one character long,
+		/// then it's merely returned.  Otherwise, it's surrounded by (?: ... ). 
 		/// </summary>
-		/// <param name="str">String to be parenthesized</param>
-		/// <returns>Properly parenthesized string</returns>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="str">	String to be parenthesized. </param>
+		///
+		/// <returns>	Properly parenthesized string. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string AsGroup(this string str)
 		{
 			string strRet;
 
-			if (RgxIgnore != null && RgxIgnore.IsMatch(str))
+			if (RgxDontParenthesize != null && RgxDontParenthesize.IsMatch(str))
 			{
 				strRet = str;
 			}
@@ -504,33 +657,51 @@ namespace RegexStringLibrary
 			return AsGroup(str);
 		}
 
-		/// <summary>
-		/// Returns pattern in which str is optional
-		/// </summary>
-		/// <param name="str">string to be made optional</param>
-		/// <returns>pattern which optionally matches string</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Returns pattern in which str is optional. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="str">	string to be made optional. </param>
+		///
+		/// <returns>	pattern which optionally matches string. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Optional(this string str)
 		{
 			return str.Rep(0, 1);
 		}
 
-		/// <summary>
-		/// Repeat spec.  repeats at least least times and at most most times.  Most can be
-		/// negative in which case it's considered to be "infinity" - i.e., it's repeated
-		/// at least "least" times with no limit on the most.
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	
+		/// Repeat spec.  repeats at least "least" times and at most "most" times.  Most can be negative in
+		/// which case it's considered to be "infinity" - i.e., it's repeated at least "least" times with
+		/// no limit on the most. This is the default so Rep(3) means repeat three or more times.
 		/// </summary>
-		/// <param name="str">String to be repeated in search</param>
-		/// <param name="least">Least number of times to repeat</param>
-		/// <param name="most">Most number of times to repeat</param>
-		/// <returns>pattern which matches the original number of string repeated properly</returns>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <exception cref="ArgumentException">	Thrown when one or more arguments have unsupported or
+		/// 										illegal values. </exception>
+		///
+		/// <param name="str">		String to be repeated in search. </param>
+		/// <param name="least">	Least number of times to repeat. </param>
+		/// <param name="most">		Most number of times to repeat. </param>
+		///
+		/// <returns>	pattern which matches the original number of string repeated properly. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Rep(this string str, int least, int most = -1)
 		{
-			string strRep;
-
 			if (least < 0)
 			{
-				throw new ArgumentException("least is negative in Rep");
+				throw new ArgumentException("least must be >= 0 in Rep");
 			}
+			if (most >= 0 && least > most)
+			{
+				throw new ArgumentException("Invalid most value in Rep");
+			}
+
+			string strRep;
+
 			if (most < 0)
 			{
 				return str.RepAtLeast(least);
@@ -543,24 +714,15 @@ namespace RegexStringLibrary
 			{
 				strRep = "?";
 			}
-			else if (least < most)
+			else
 			{
 				strRep = string.Format("{{{0},{1}}}", least, most);
 			}
-			else
-			{
-				throw new ArgumentException("least must be less than most in Rep");
-			}
+
 			return str.AsGroup() + strRep;
 		}
 
-		/// <summary>
-		/// Creates pattern which matches str at least count times
-		/// </summary>
-		/// <param name="str">String to be repeated</param>
-		/// <param name="count">Count of times it must be repeated</param>
-		/// <returns>Proper pattern</returns>
-		public static string RepAtLeast(this string str, int count)
+		private static string RepAtLeast(this string str, int count)
 		{
 			string strRep;
 			if (count < 0)
@@ -658,28 +820,46 @@ namespace RegexStringLibrary
 			return Capture(str);
 		}
 
-		/// <summary>
-		/// Names the match made on the string
-		/// </summary>
-		/// <param name="str">String to be matched</param>
-		/// <param name="strName">Name for the match</param>
-		/// <returns>Pattern which names the match</returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Names the match made on the string. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="str">		String to be matched. </param>
+		/// <param name="strName">	Name for the match. </param>
+		///
+		/// <returns>	Pattern which names the match. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Named(this string str, string strName)
 		{
 			return string.Format("(?<{0}>{1})", strName, str);
 		}
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Makes the search atomic. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="str">	pattern to be affected. </param>
+		///
+		/// <returns>	Atomic version of the search string. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string Atomic(this string str)
 		{
 			return string.Format("(?>{0})", str);
 		}
-		/// <summary>
-		/// Pattern which depends on whether a group has been matched
-		/// </summary>
-		/// <param name="strLabel">Group to check whether it's matched</param>
-		/// <param name="strHasMatched">Pattern to use if there was a match</param>
-		/// <param name="strDidntMatch">Pattern to use if there wasn't a match</param>
-		/// <returns>Conditional pattern</returns>
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Pattern which depends on whether a group has been matched. </summary>
+		///
+		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="strLabel">			Group to check whether it's matched. </param>
+		/// <param name="strHasMatched">	Pattern to use if there was a match. </param>
+		/// <param name="strDidntMatch">	Pattern to use if there wasn't a match. </param>
+		///
+		/// <returns>	Conditional pattern. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string If(this string strLabel, string strHasMatched, string strDidntMatch = "")
 		{
 			return string.Format("(?({0}){1}|{2})", strLabel, strHasMatched, strDidntMatch);
@@ -747,6 +927,17 @@ namespace RegexStringLibrary
 			return If(strStack, Failure);
 		}
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Balanced group. </summary>
+		///
+		/// <remarks>	Still working on this one.  Darrellp, 10/1/2012. </remarks>
+		///
+		/// <param name="strOpen">		The string open. </param>
+		/// <param name="strClose">		The string close. </param>
+		/// <param name="strBetween">	The string between. </param>
+		///
+		/// <returns>	. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		public static string BalancedGroup(string strOpen, string strClose, string strBetween)
 		{
 			string strInterior = strBetween.RepAtLeast(1);
