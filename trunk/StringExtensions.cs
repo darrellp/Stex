@@ -247,7 +247,7 @@ namespace RegexStringLibrary
 		/// February 10, 1912
 		/// NOV 4, 1956
 		/// Nov 4, 1956
-		/// 1000 AD
+		/// 1940
 		/// between 1948 and 1950
 		/// 11-4-1956
 		/// 11-04-195
