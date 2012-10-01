@@ -245,11 +245,18 @@ namespace RegexStringLibrary
 		/// 
 		/// 10/12/2012
 		/// February 10, 1912
+		/// NOV 4, 1956
+		/// Nov 4, 1956
 		/// 1000 AD
 		/// between 1948 and 1950
 		/// 11-4-1956
+		/// 11-04-195
+		/// 4 November 1956
 		/// ca 1932
 		/// after 2000
+		/// before 800 BC
+		/// After Jan. 1, 1932
+		/// between nov 4, 1956 and ca sep 11, 1980
 		/// 
 		/// Darrellp, 10/1/2012. 
 		/// </remarks>
