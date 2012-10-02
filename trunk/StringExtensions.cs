@@ -21,10 +21,18 @@ namespace RegexStringLibrary
 		public static string Bell { get { return @"\a"; } }
 		public static string CR { get { return @"\r"; } }
 		public static string LF { get { return @"\n"; } }
+		public static string FormFeed { get { return @"\f"; } }
 		public static string Digit { get { return @"\d"; } }
+		public static string NonDigit { get { return @"\D"; } }
 		public static string Word { get { return @"\w"; } }
 		public static string Tab { get { return @"\t"; } }
 		public static string White { get { return @"\s"; } }
+		public static string NonWhite { get { return @"\S"; } }
+		public static string VerticalTab { get { return @"\v"; } }
+		public static string WordChar { get { return @"\w"; } }
+		public static string NonWordChar { get { return @"\W"; } }
+		public static string WordBoundary { get { return @"\b"; } }
+		public static string NonWordBoundary { get { return @"\B"; } }
 		public static string WhitePadding { get { return White.Rep(0); } }
 		public static string CapLetterRange { get { return Range("A", "Z"); } }
 		public static string LowerLetterRange { get { return Range("a","z"); } }
@@ -637,7 +645,9 @@ namespace RegexStringLibrary
 		/// then it's merely returned.  Otherwise, it's surrounded by (?: ... ). 
 		/// </summary>
 		///
-		/// <remarks>	Darrellp, 10/1/2012. </remarks>
+		/// <remarks>	
+		/// This is a non-capturing group - use Capture() for a capturing group.  Darrellp, 10/1/2012. 
+		/// </remarks>
 		///
 		/// <param name="str">	String to be parenthesized. </param>
 		///
@@ -884,7 +894,7 @@ namespace RegexStringLibrary
 		///
 		/// <returns>	Pattern which pushes the stack. </returns>
 		////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static string Push(this string str, string strStack)
+		public static string Push(this string strStack, string str = "")
 		{
 			return string.Format("(?<{0}>{1})", strStack, str);
 		}
@@ -899,7 +909,7 @@ namespace RegexStringLibrary
 		///
 		/// <returns>	Pattern which names the match. </returns>
 		////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static string Pop(this string str, string strStack)
+		public static string Pop(this string strStack, string str = "")
 		{
 			return string.Format("(?<-{0}>{1})", strStack, str);
 		}
@@ -929,7 +939,7 @@ namespace RegexStringLibrary
 		///
 		/// <returns>	Regex pattern which matches if the stack is empty, fails otherwise. </returns>
 		////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static string MatchEmptyStack(string strStack)
+		public static string MatchEmptyStack(this string strStack)
 		{
 			return If(strStack, Failure);
 		}
@@ -937,24 +947,29 @@ namespace RegexStringLibrary
 		////////////////////////////////////////////////////////////////////////////////////////////////////
 		/// <summary>	Balanced group. </summary>
 		///
-		/// <remarks>	Still working on this one.  Darrellp, 10/1/2012. </remarks>
+		/// <remarks>	
+		/// Finally figured out what's going on here with the help of 
+		/// http://www.codeproject.com/Articles/21080/In-Depth-with-RegEx-Matching-Nested-Constructions.
+		/// Darrellp, 10/1/2012. 
+		/// </remarks>
 		///
-		/// <param name="strOpen">		The string open. </param>
-		/// <param name="strClose">		The string close. </param>
-		/// <param name="strBetween">	The string between. </param>
+		/// <param name="strOpen">	The string open. </param>
+		/// <param name="strClose">	The string close. </param>
 		///
-		/// <returns>	. </returns>
+		/// <returns>	A string matching a balanced group of opening strings and closing strings.. </returns>
 		////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static string BalancedGroup(string strOpen, string strClose, string strBetween)
+		public static string BalancedGroup(string strOpen, string strClose)
 		{
-			string strInterior = strBetween.RepAtLeast(1);
-			string strEnter = strOpen + Push(string.Empty, "n");
-			string strExit = strClose + Pop(string.Empty, "n");
-			string strAtomic = AnyOf(strInterior, strEnter, strExit).Atomic().Rep(0);
-			string strCheck = MatchEmptyStack("n");
-			string strBalanced = strOpen + strAtomic + strCheck + strClose;
+			string strPush = strOpen + "bgStack".Push();
+			string strPop = strClose + "bgStack".Pop();
+			string strAtomicContents = OrAnyOf(strPush, strPop, Any.Optional());
+			string strAtomic = strAtomicContents.Atomic().Rep(0);
 
-			return strBalanced;
+			return Cat(
+				strOpen,
+				strAtomic,
+				"bgStack".MatchEmptyStack(),
+				strClose);
 		}
 	}
 }
