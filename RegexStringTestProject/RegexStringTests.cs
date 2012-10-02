@@ -125,12 +125,11 @@ namespace RegexStringTestProject
 			Assert.AreEqual("a{2,3}(?:multi-char){4}c?", output);
 
 			output = Stex.Cat(
-				"a".Rep(0,-1),
-				"multi-char".Rep(1,-1),
-				"c".Rep(10,-1));
+				"a".Rep(0),
+				"multi-char".Rep(1),
+				"c".Rep(10));
 			Assert.AreEqual("a*(?:multi-char)+c{10,}", output);
 
-			bool caught = false;
 			"a".Rep(2, 1);
 		}
 		[TestMethod]
@@ -238,12 +237,11 @@ namespace RegexStringTestProject
 			TestNumericString(rgx, "4 7 1", false);
 		}
 
-		// This currently fails - gotta figure it all out
-		//[TestMethod]
+		[TestMethod]
 		public void BalancingGroupTest()
 		{
-			string strBG = Stex.BalancedGroup("{", "}", Stex.NotCharIn("{}"));
-			Regex rgx = new Regex(strBG);
+			string strBg = Stex.Begin + Stex.BalancedGroup("{".Esc(), "}".Esc()) + Stex.End;
+			Regex rgx = new Regex(strBg);
 			Match mtch = rgx.Match("{abc{def}g{hij}}");
 			Assert.IsTrue(mtch.Success);
 			mtch = rgx.Match("{abc{def}g{hij}");
