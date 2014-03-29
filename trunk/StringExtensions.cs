@@ -291,6 +291,8 @@ namespace RegexStringLibrary
 				throw new ArgumentException("Null date in GetDateInfo");
 			}
 
+			// TODO: We should be caching the compiled Regex's
+
 			int iType = (fAmerican ? 2 : 0) + (fAllowBetween ? 1 : 0);
 			Regex rgx = null;
 			switch (iType)
