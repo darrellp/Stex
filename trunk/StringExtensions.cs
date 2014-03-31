@@ -923,6 +923,20 @@ namespace RegexStringLibrary
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>	Matches and earlier named match. </summary>
+		///
+		/// <remarks>	Darrellp, 3/29/2014. </remarks>
+		///
+		/// <param name="strName">	Name to reference for the match. </param>
+		///
+		/// <returns>	Pattern which references the name. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		public static string BRef(string strName)
+		{
+			return string.Format(@"\k<{0}>", strName);
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 		/// <summary>	Forces a greedy search on a pattern. </summary>
 		///
 		/// <remarks>	Darrellp, 10/1/2012. </remarks>
