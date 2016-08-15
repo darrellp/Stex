@@ -1120,7 +1120,45 @@ namespace RegexStringLibrary
 				strGreedy,
 				strStack.MatchEmptyStack(),
 				strClose);
-		} 
-		#endregion
-	}
+		}
+        #endregion
+
+        #region Substitutions
+        public static string LiteralDollar { get { return @"$$"; } }
+        public static string WholeMatch { get { return @"$&"; } }
+        public static string BeforeMatch { get { return @"$`"; } }
+        public static string AfterMatch { get { return @"$'"; } }
+        public static string LastGroup { get { return @"$+"; } }
+        public static string WholeString { get { return @"$_"; } }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>	Named match. </summary>
+        ///
+        /// <remarks>	Darrellp, 3/29/2014. </remarks>
+        ///
+        /// <param name="strName">	Name to reference. </param>
+        ///
+        /// <returns>	Pattern which references the name. </returns>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string NamedValue(string strName)
+        {
+            return string.Format(@"${{0}}>", strName);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>	Numbered match. </summary>
+        ///
+        /// <remarks>	Darrellp, 3/29/2014. </remarks>
+        ///
+        /// <param name="index">	Name to reference. </param>
+        ///
+        /// <returns>	Pattern which references the name. </returns>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string NumberedValue(int index)
+        {
+            return string.Format(@"${0}>", index);
+        }
+
+        #endregion
+    }
 }
