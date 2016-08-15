@@ -561,21 +561,86 @@ namespace RegexStringLibrary
 		public static string CaseSensitive(this string str, bool fCaseSensitive)
 		{
 			return "(?" + (fCaseSensitive ? "-" : "") + "i:" + str + ")";
-		} 
-		#endregion
+		}
 
-		#region Character Classes
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// <summary>	Returns a range of chars for use in AnyChar. </summary>
-		///
-		/// <remarks>	Darrellp, 10/1/2012. </remarks>
-		///
-		/// <param name="strLow">	Starting char. </param>
-		/// <param name="strHigh">	Ending char. </param>
-		///
-		/// <returns>	The Range. </returns>
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static string Range(string strLow, string strHigh)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>	Use Multiline mode. </summary>
+        ///
+        /// <remarks>	Darrellp, 10/1/2012. </remarks>
+        ///
+        /// <param name="str">				pattern to be affected. </param>
+        /// <param name="fMultiline">	true for multiline mode</param>
+        ///
+        /// <returns>	. </returns>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string Multiline(this string str, bool fMultiline)
+        {
+            return "(?" + (fMultiline ? "-" : "") + "m:" + str + ")";
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>	Don't capture unnamed groups. </summary>
+        ///
+        /// <remarks>	Not all that useful in Stex since it uses non-capturing
+        ///             groups unless the user explicitly asks for a capturing group.
+        ///             Darrellp, 10/1/2012. </remarks>
+        ///
+        /// <param name="str">				    pattern to be affected. </param>
+        /// <param name="fNoUnnamedCaptures">	true to turn off unnamed captures, false to turn on</param>
+        ///
+        /// <returns>	. </returns>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string NoUnnamedCaptures(this string str, bool fNoUnnamedCaptures)
+        {
+            return "(?" + (fNoUnnamedCaptures ? "-" : "") + "n:" + str + ")";
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>	Use single-line mode. </summary>
+        ///
+        /// <remarks>	Darrellp, 10/1/2012. </remarks>
+        ///
+        /// <param name="str">				pattern to be affected. </param>
+        /// <param name="fSingleLine">	    true for single line mode</param>
+        ///
+        /// <returns>	. </returns>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string SingleLine(this string str, bool fSingleLine)
+        {
+            return "(?" + (fSingleLine ? "-" : "") + "s:" + str + ")";
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>	Ignore rgx white space. </summary>
+        ///
+        /// <remarks>	I really don't know why anyone would use this in Stex but
+        ///             I include it for completeness sake.
+        ///             Darrellp, 10/1/2012. </remarks>
+        ///
+        /// <param name="str">				pattern to be affected. </param>
+        /// <param name="fIgnoreWS">	    true to ignore unescaped WS in RGX string</param>
+        ///
+        /// <returns>	. </returns>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string IgnoreRGXWhiteSpace(this string str, bool fIgnoreWS)
+        {
+            return "(?" + (fIgnoreWS ? "-" : "") + "x:" + str + ")";
+        }
+
+        #endregion
+
+        #region Character Classes
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>	Returns a range of chars for use in AnyChar. </summary>
+        ///
+        /// <remarks>	Darrellp, 10/1/2012. </remarks>
+        ///
+        /// <param name="strLow">	Starting char. </param>
+        /// <param name="strHigh">	Ending char. </param>
+        ///
+        /// <returns>	The Range. </returns>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string Range(string strLow, string strHigh)
 		{
 			return strLow + '-' + strHigh;
 		}
@@ -936,16 +1001,30 @@ namespace RegexStringLibrary
 			return string.Format(@"\k<{0}>", strName);
 		}
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// <summary>	Forces a greedy search on a pattern. </summary>
-		///
-		/// <remarks>	Darrellp, 10/1/2012. </remarks>
-		///
-		/// <param name="str">	pattern to be made greedy. </param>
-		///
-		/// <returns>	greedy pattern. </returns>
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static string Greedy(this string str)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>	Matches and earlier unnamed match. </summary>
+        ///
+        /// <remarks>	Darrellp, 3/29/2014. </remarks>
+        ///
+        /// <param name="iMatch">	index to reference for the match. </param>
+        ///
+        /// <returns>	Pattern which references the index. </returns>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string BRef(int iMatch)
+        {
+            return string.Format(@"\<{0}>", iMatch);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>	Forces a greedy search on a pattern. </summary>
+        ///
+        /// <remarks>	Darrellp, 10/1/2012. </remarks>
+        ///
+        /// <param name="str">	pattern to be made greedy. </param>
+        ///
+        /// <returns>	greedy pattern. </returns>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string Greedy(this string str)
 		{
 			return "(?>" + str + ")";
 		}
