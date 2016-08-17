@@ -13,6 +13,7 @@ to make life easier.  I originally did this library because I had a crazy compli
 and general date format I needed to account for so there's a recognizer included for
 that.  It recognizes dates such as:
 
+```
   10/12/2012
   February 10, 1912
   NOV 4, 1956
@@ -27,6 +28,7 @@ that.  It recognizes dates such as:
   before 800 BC
   After Jan. 1, 1932
   between nov 4, 1956 and ca sep 11, 1980
+```
   
 and puts each of their elements into named parts of the match.  It allows for either British
 or American style ordering and you can allow or disallow the "between" which produces two
