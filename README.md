@@ -32,6 +32,7 @@ and puts each of their elements into named parts of the match.  It allows for ei
 or American style ordering and you can allow or disallow the "between" which produces two
 dates.  The RGX string for the American dates allowing "between" is: 
 
+```
 (?i:^(?:(?<betweenPrefix>(?:Between|Bet)) )?(?:(?<prefix>(?:About|Abt|A|After|Aft|Before|Bef|B|Calculated|Cal|Circa|Cir|Ca|C)) )
 ?(?:(?:(?<mnthName>(?:JAN|FEB|MAR|APR|JUN|JUL|AUG|SEP|OCT|NOV|DEC)).?|(?<mnthName>
 (?:JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER))) 
@@ -51,6 +52,7 @@ dates.  The RGX string for the American dates allowing "between" is:
 (?:JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER))) 
 (?<day2>\d\d?)|(?<year2>\d\d\d\d?)(?:-|/|.| )(?<month2>\d\d?)(?:-|/|.| )(?<day2>\d\d?)|(?<year2>\d\d\d\d?))
 (?: (?<suffix2>(?:BC|B.C.)))?|)$)
+```
 
 I don't think I ever could have come up with this string without Stex.
 
@@ -81,7 +83,9 @@ rgx.Match("Password").Success.Dump("Password");
 ```
 
 The rgx string produced is:
+```
   ^(?=.*[A-Z].*[A-Z])(?=.*[!@#$&*])(?=.*\d.*\d)(?=.*[a-z].*[a-z]).{8}$
+```
   
 The Rep() function takes either 1 or 2 arguments.  The first argument is the minimum number of repeats and the second
 is the maximum.  If the second argument is omitted, then it's effectively infinity.  It's smart enough to use shortcuts
