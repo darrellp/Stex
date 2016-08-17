@@ -93,7 +93,7 @@ namespace RegexStringLibrary
 		// "((...))" or parenthesizing "a" and getting "(a)", etc..  Recursively using search
 		// patterns on search patterns - gotta love it.
 		private static readonly Regex RgxDontParenthesize = new Regex(
-			@"^(?:.|\\.|\[(?:\\\]|[^\]])*[^\\]\]|\((?:\\\)|[^\)])*[^\\]\))$",
+			@"^(?:.|\\.|\\[Pp]\{[^}]+\}|\[(?:\\\]|[^\]])*[^\\]\]|\((?:\\\)|[^\)])*[^\\]\))$",
 			RegexOptions.Compiled);
 
 		// Valid Hex string
@@ -694,19 +694,47 @@ namespace RegexStringLibrary
 		{
 			return NotCharIn(s);
 		}
-		#endregion
 
-		#region Concatenation
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// <summary>	Concatenates strings. </summary>
-		///
-		/// <remarks>	Darrellp, 10/1/2012. </remarks>
-		///
-		/// <param name="s">	strings to be concatenated. </param>
-		///
-		/// <returns>	concatenation of all the strings in s. </returns>
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static string Cat(params string[] s)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>	Accept any characters from Unicode general category or named block. </summary>
+        ///
+        /// <remarks>	Darrellp, 8/17/2016. </remarks>
+        ///
+        /// <param name="s">	Unicode general category or named block name. </param>
+        ///
+        /// <returns>	Pattern. </returns>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string UnicodeCategory(params string[] s)
+        {
+            return @"\p{" + Cat(s) + "}";
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>	Accept any characters NOT from a Unicode general category or named block. </summary>
+        ///
+        /// <remarks>	Darrellp, 8/17/2016. </remarks>
+        ///
+        /// <param name="s">	Unicode general category or named block name. </param>
+        ///
+        /// <returns>	Pattern. </returns>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string NotInUnicodeCategory(params string[] s)
+        {
+            return @"\P{" + Cat(s) + "}";
+        }
+        #endregion
+
+        #region Concatenation
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>	Concatenates strings. </summary>
+        ///
+        /// <remarks>	Darrellp, 10/1/2012. </remarks>
+        ///
+        /// <param name="s">	strings to be concatenated. </param>
+        ///
+        /// <returns>	concatenation of all the strings in s. </returns>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string Cat(params string[] s)
 		{
 			return s.Aggregate((sAg, str) => sAg + str);
 		} 
@@ -1142,7 +1170,7 @@ namespace RegexStringLibrary
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         public static string NamedValue(string strName)
         {
-            return string.Format(@"${{0}}>", strName);
+            return "${" + strName + @"}";
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1156,7 +1184,7 @@ namespace RegexStringLibrary
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         public static string NumberedValue(int index)
         {
-            return string.Format(@"${0}>", index);
+            return string.Format(@"${0}", index);
         }
 
         #endregion
