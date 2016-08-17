@@ -57,7 +57,7 @@ I don't think I ever could have come up with this string without Stex.
 A couple of examples (from Linqpad which
 supplies the "Dump" routine):
 
--------------------------------
+```C#
 // Password check to ensure
 //		8 characters length
 //		2 letters in Upper Case
@@ -65,7 +65,7 @@ supplies the "Dump" routine):
 //		2 numerals (0-9)
 //		3 letters in Lower Case
 var rgxString = 
-	Begin +
+Begin +
 	(Any.Rep(0) + CapLetter + Any.Rep(0) + CapLetter).PosLookAhead() +
 	(Any.Rep(0) + AnyCharFrom("!@#$&*")).PosLookAhead() +
 	(Any.Rep(0) + Digit + Any.Rep(0) + Digit).PosLookAhead() +
@@ -78,7 +78,7 @@ rgx.Match("3AA!aa3a").Success.Dump("3AA!aa3a");
 rgx.Match("3AA!aa@a").Success.Dump("3AA!aa@a");
 rgx.Match("3AA!aa3ab").Success.Dump("3AA!aa3ab");
 rgx.Match("Password").Success.Dump("Password");
-----------------------------------
+```
 
 The rgx string produced is:
   ^(?=.*[A-Z].*[A-Z])(?=.*[!@#$&*])(?=.*\d.*\d)(?=.*[a-z].*[a-z]).{8}$
