@@ -1,0 +1,10 @@
+D:\OneDrive\Documents\My Projects\My Repos\Stex\RegexStringTestProject\bin\Debug\RegexStringTestProject.dll
+D:\OneDrive\Documents\My Projects\My Repos\Stex\RegexStringTestProject\bin\Debug\RegexStringTestProject.pdb
+D:\OneDrive\Documents\My Projects\My Repos\Stex\RegexStringTestProject\bin\Debug\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll
+D:\OneDrive\Documents\My Projects\My Repos\Stex\RegexStringTestProject\bin\Debug\RegexString Library.dll
+D:\OneDrive\Documents\My Projects\My Repos\Stex\RegexStringTestProject\bin\Debug\RegexString Library.pdb
+D:\OneDrive\Documents\My Projects\My Repos\Stex\RegexStringTestProject\obj\Debug\RegexStringTestProject.csproj.AssemblyReference.cache
+D:\OneDrive\Documents\My Projects\My Repos\Stex\RegexStringTestProject\obj\Debug\RegexStringTestProject.csproj.CoreCompileInputs.cache
+D:\OneDrive\Documents\My Projects\My Repos\Stex\RegexStringTestProject\obj\Debug\RegexStringTestProject.csproj.CopyComplete
+D:\OneDrive\Documents\My Projects\My Repos\Stex\RegexStringTestProject\obj\Debug\RegexStringTestProject.dll
+D:\OneDrive\Documents\My Projects\My Repos\Stex\RegexStringTestProject\obj\Debug\RegexStringTestProject.pdb

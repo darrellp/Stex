@@ -809,9 +809,9 @@ namespace RegexStringLibrary
 		///
 		/// <returns>	pattern which optionally matches string. </returns>
 		////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static string Optional(this string str)
+		public static string Optional(this string str, bool isLazy = false)
 		{
-			return str.Rep(0, 1);
+			return str.Rep(0, 1, isLazy);
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -832,7 +832,7 @@ namespace RegexStringLibrary
 		///
 		/// <returns>	pattern which matches the original number of string repeated properly. </returns>
 		////////////////////////////////////////////////////////////////////////////////////////////////////
-		public static string Rep(this string str, int least, int most = -1)
+		public static string Rep(this string str, int least, int most = -1, bool isLazy = false)
 		{
 			if (least < 0)
 			{
@@ -844,10 +844,12 @@ namespace RegexStringLibrary
 			}
 
 			string strRep;
+			string lazySuffix = isLazy ? "?" : "";
+
 
 			if (most < 0)
 			{
-				return str.RepAtLeast(least);
+				return str.RepAtLeast(least) + lazySuffix;
 			}
 			if (least == most)
 			{
@@ -862,7 +864,7 @@ namespace RegexStringLibrary
 				strRep = string.Format("{{{0},{1}}}", least, most);
 			}
 
-			return str.AsGroup() + strRep;
+			return str.AsGroup() + strRep + lazySuffix;
 		}
 
 		private static string RepAtLeast(this string str, int count)
